@@ -144,6 +144,9 @@ angular.module('mapping', [])
     $scope.set = function (key, value) {
         Object.keys(AVAILABLE_OPTIONS).forEach(function (option) {
             if (option.toLowerCase() === key) {
+                if (AVAILABLE_OPTIONS[option] === Boolean) {
+                    value = (value === "" || value === "true") ? true : false;
+                }
                 $scope.options[option] = AVAILABLE_OPTIONS[option](value);
             }
         });
