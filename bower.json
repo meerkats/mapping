@@ -1,0 +1,22 @@
+{
+  "name": "mapping",
+  "version": "0.1.0",
+  "authors": [
+    "Meerkats <develop@meerkats.com.au>"
+  ],
+  "description": "Mapping places and things with angular.",
+  "main": "mapping.js",
+  "keywords": [
+    "angular",
+    "rwd",
+    "mapping"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
