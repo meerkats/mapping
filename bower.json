@@ -1,6 +1,6 @@
 {
   "name": "mapping",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "authors": [
     "Meerkats <develop@meerkats.com.au>"
   ],
@@ -11,7 +11,6 @@
     "rwd",
     "mapping"
   ],
-  "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",

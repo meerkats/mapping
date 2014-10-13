@@ -123,12 +123,12 @@ function ($scope, $timeout, MarkerService) {
      * @param {string} value MapOption value (can be string)
      */
     $scope.set = function (key, value) {
-        Object.keys(AVAILABLE_OPTIONS).forEach(function (option) {
-            if (option.toLowerCase() === key) {
-                if (AVAILABLE_OPTIONS[option] === Boolean) {
+        angular.forEach(AVAILABLE_OPTIONS, function (_value, _key) {
+            if (_key.toLowerCase() === key) {
+                if (_value === Boolean) {
                     value = (value === '' || value === 'true') ? true : false;
                 }
-                $scope.options[option] = AVAILABLE_OPTIONS[option](value);
+                $scope.options[_key] = AVAILABLE_OPTIONS[_key](value);
             }
         });
     };
@@ -140,7 +140,11 @@ function ($scope, $timeout, MarkerService) {
      * @return Initialized Google Map object
      */
     $scope.initialize = function (callback) {
-        google.maps.event.addDomListener(window, 'load', function () {
+        var _initialized = false;
+        var _initialize = function () {
+            if (_initialized) {
+                return;
+            }
             $scope.googlemap = new google.maps.Map($scope.element, $scope.options);
             $timeout(function () {
                 $scope.refresh();
@@ -148,7 +152,9 @@ function ($scope, $timeout, MarkerService) {
             if (typeof callback === 'function') {
                 callback($scope);
             }
-        });
+        };
+        google.maps.event.addDomListener(window, 'load', _initialize);
+        setTimeout(_initialize, 1500); // fallback for IE8
     };
 
     /**
@@ -158,7 +164,7 @@ function ($scope, $timeout, MarkerService) {
     $scope.refresh = function () {
         _markers = [];
         var markers = MarkerService.markers();
-        markers.forEach(function (marker) {
+        angular.forEach(markers, function (marker) {
             $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
                              marker.title,
                              marker.title);
