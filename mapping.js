@@ -2,6 +2,33 @@ angular.module('mapping', [])
 
 /**
  * @ngdoc service
+ * @name mapping.service:GoogleService
+ * @description
+ * Asynchronously load the Google API.
+ */
+.factory('GoogleService', ['$q', '$window',
+function ($q, $window) {
+    // Google's url for async maps initialization accepting callback function
+    var callback_name = 'initialize_maps';
+    var maps_url = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&callback=';
+    var maps_defer = $q.defer();
+
+    $window[callback_name] = maps_defer.resolve;
+
+    // Start loading google maps
+    (function () {
+          var script = document.createElement('script');
+          script.src = maps_url + callback_name;
+          document.body.appendChild(script);
+    })();
+
+    return {
+        initialized: maps_defer.promise
+    };
+}])
+
+/**
+ * @ngdoc service
  * @name mapping.service:MarkerService
  * @description
  * Set of markers to be used within the map.
@@ -222,8 +249,8 @@ function ($scope, $timeout, MarkerService) {
  * @description
  * Creates a Google Map with all available google map options
  */
-.directive('googleMap', ['MarkerService',
-function (MarkerService) {
+.directive('googleMap', ['GoogleService', 'MarkerService',
+function (GoogleService, MarkerService) {
     return {
         restrict: 'EA',
         controller: 'GoogleMapController',
@@ -235,9 +262,11 @@ function (MarkerService) {
             for (var opt in attr) {
                 $scope.set(opt, attr[opt]);
             }
-            $scope.options.center = new google.maps.LatLng(latitude, longitude);
-            $scope.element = element[0];
-            $scope.initialize();
+            GoogleService.initialized.then(function () {
+                $scope.options.center = new google.maps.LatLng(latitude, longitude);
+                $scope.element = element[0];
+                $scope.initialize();
+            });
         }
     };
 }])
