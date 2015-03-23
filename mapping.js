@@ -16,11 +16,9 @@ function ($q, $window) {
     $window[callback_name] = maps_defer.resolve;
 
     // Start loading google maps
-    (function () {
-          var script = document.createElement('script');
-          script.src = maps_url + callback_name;
-          document.body.appendChild(script);
-    })();
+    var script = document.createElement('script');
+    script.src = maps_url + callback_name;
+    document.body.appendChild(script);
 
     return {
         initialized: maps_defer.promise
