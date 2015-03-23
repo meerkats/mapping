@@ -2,6 +2,33 @@ angular.module('mapping', [])
 
 /**
  * @ngdoc service
+ * @name mapping.service:GoogleService
+ * @description
+ * Asynchronously load the Google API.
+ */
+.factory('GoogleService', ['$q', '$window',
+function ($q, $window) {
+    // Google's url for async maps initialization accepting callback function
+    var callback_name = 'initialize_maps';
+    var maps_url = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&callback=';
+    var maps_defer = $q.defer();
+
+    $window[callback_name] = maps_defer.resolve;
+
+    // Start loading google maps
+    (function () {
+          var script = document.createElement('script');
+          script.src = maps_url + callback_name;
+          document.body.appendChild(script);
+    })();
+
+    return {
+        initialized: maps_defer.promise
+    };
+}])
+
+/**
+ * @ngdoc service
  * @name mapping.service:MarkerService
  * @description
  * Set of markers to be used within the map.
@@ -70,8 +97,8 @@ function () {
  * @description
  * Controls interactive Google Map and interactive map markers
  */
-.controller('GoogleMapController', ['$scope', '$timeout', 'MarkerService',
-function ($scope, $timeout, MarkerService) {
+.controller('GoogleMapController', ['$scope', '$timeout', '$q', '$window', 'GoogleService', 'MarkerService',
+function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
 
     var _markers = [];
     var AVAILABLE_OPTIONS = {
@@ -140,6 +167,7 @@ function ($scope, $timeout, MarkerService) {
      * @return Initialized Google Map object
      */
     $scope.initialize = function (callback) {
+        var google_defer = $q.defer();
         var _initialized = false;
         var _initialize = function () {
             if (_initialized) {
@@ -152,9 +180,11 @@ function ($scope, $timeout, MarkerService) {
             if (typeof callback === 'function') {
                 callback($scope);
             }
+            google_defer.resolve();
         };
         google.maps.event.addDomListener(window, 'load', _initialize);
         setTimeout(_initialize, 1500); // fallback for IE8
+        return google_defer.promise;
     };
 
     /**
@@ -162,13 +192,15 @@ function ($scope, $timeout, MarkerService) {
      * date with the MarkerService
      */
     $scope.refresh = function () {
-        _markers = [];
-        var markers = MarkerService.markers();
-        angular.forEach(markers, function (marker) {
-            $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
-                             marker.title,
-                             marker.title);
-        });
+        if ($window.google) {
+            _markers = [];
+            var markers = MarkerService.markers();
+            angular.forEach(markers, function (marker) {
+                $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
+                                 marker.title,
+                                 marker.title);
+            });
+        }
     };
 
     /**
@@ -222,22 +254,37 @@ function ($scope, $timeout, MarkerService) {
  * @description
  * Creates a Google Map with all available google map options
  */
-.directive('googleMap', ['MarkerService',
-function (MarkerService) {
+.directive('googleMap', ['$rootScope', 'GoogleService', 'MarkerService',
+function ($rootScope, GoogleService, MarkerService) {
     return {
         restrict: 'EA',
+        scope: {
+            latitude: '=',
+            longitude: '=',
+            zoom: '='
+        },
         controller: 'GoogleMapController',
         link: function ($scope, element, attr) {
-            var latitude = attr.latitude || 0;
-            var longitude = attr.longitude || 0;
+            $scope.latitude = $scope.latitude || 0;
+            $scope.longitude = $scope.longitude || 0;
             // set custom google map options from other attributes
             // @see GoogleMapController for supported options
             for (var opt in attr) {
                 $scope.set(opt, attr[opt]);
             }
-            $scope.options.center = new google.maps.LatLng(latitude, longitude);
-            $scope.element = element[0];
-            $scope.initialize();
+            GoogleService.initialized.then(function () {
+                $scope.options.center = new google.maps.LatLng($scope.latitude, $scope.longitude);
+                $scope.element = element[0];
+                $scope.initialize().then(function () {
+                    $scope.$watchGroup(['latitude', 'longitude'], function () {
+                        $scope.googlemap.setCenter(new google.maps.LatLng($scope.latitude, $scope.longitude));
+                    });
+                    $scope.$watch('zoom', function (zoom) {
+                        $scope.googlemap.setZoom(zoom);
+                    });
+                    $scope.refresh();
+                });
+            });
         }
     };
 }])
@@ -262,6 +309,27 @@ function (MarkerService) {
             $scope.refresh();
         }
     };
+}])
+
+.directive('mapMarker', ['$window', 'MarkerService', function ($window, MarkerService) {
+    return {
+        restrict: 'EA',
+        scope: {
+            latitude: '=',
+            longitude: '='
+        },
+        controller: 'GoogleMapController',
+        link: function ($scope, element, attr, controller) {
+            $scope.latitude = $scope.latitude || 0;
+            $scope.longitude = $scope.longitude || 0;
+            $scope.marker = MarkerService.addMarker($scope.latitude, $scope.longitude);
+            $scope.$watchGroup(['latitude', 'longitude'], function () {
+                if ($window.google) {
+                    $scope.marker.setPosition(new google.maps.LatLng($scope.latitude, $scope.longitude));
+                }
+            });
+        }
+    }
 }])
 
 /**
