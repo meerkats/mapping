@@ -1,6 +1,6 @@
 # Mapping
 
-A set of directives to map places and things with angular. Supports the following mapping solutioons:
+A set of directives to map places and things with angular. Supports the following mapping solutions:
 
 - Google Maps
 - _Comming Soon: Mapbox_
