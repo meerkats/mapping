@@ -49,6 +49,7 @@ function () {
         this.latitude = options.latitude;
         this.longitude = options.longitude;
         this.title = options.title || null;
+        this.icon = options.icon || null;
     };
 
     /**
@@ -62,7 +63,8 @@ function () {
         var marker = new Marker({
             latitude: latitude,
             longitude: longitude,
-            title: title
+            title: title,
+            icon: icon
         });
         _markers.push(marker);
         return marker;
@@ -198,7 +200,8 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
             angular.forEach(markers, function (marker) {
                 $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
                                  marker.title,
-                                 marker.title);
+                                 marker.title,
+                                 marker.icon);
             });
         }
     };
@@ -261,6 +264,7 @@ function ($rootScope, GoogleService, MarkerService) {
         scope: {
             latitude: '=',
             longitude: '=',
+            options: '=',
             zoom: '='
         },
         controller: 'GoogleMapController',
@@ -269,9 +273,7 @@ function ($rootScope, GoogleService, MarkerService) {
             $scope.longitude = $scope.longitude || 0;
             // set custom google map options from other attributes
             // @see GoogleMapController for supported options
-            for (var opt in attr) {
-                $scope.set(opt, attr[opt]);
-            }
+            angular.extend($scope.options, $scope.opt);
             GoogleService.initialized.then(function () {
                 $scope.options.center = new google.maps.LatLng($scope.latitude, $scope.longitude);
                 $scope.element = element[0];
@@ -309,27 +311,6 @@ function (MarkerService) {
             $scope.refresh();
         }
     };
-}])
-
-.directive('mapMarker', ['$window', 'MarkerService', function ($window, MarkerService) {
-    return {
-        restrict: 'EA',
-        scope: {
-            latitude: '=',
-            longitude: '='
-        },
-        controller: 'GoogleMapController',
-        link: function ($scope, element, attr, controller) {
-            $scope.latitude = $scope.latitude || 0;
-            $scope.longitude = $scope.longitude || 0;
-            $scope.marker = MarkerService.addMarker($scope.latitude, $scope.longitude);
-            $scope.$watchGroup(['latitude', 'longitude'], function () {
-                if ($window.google) {
-                    $scope.marker.setPosition(new google.maps.LatLng($scope.latitude, $scope.longitude));
-                }
-            });
-        }
-    }
 }])
 
 /**
