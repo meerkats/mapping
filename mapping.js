@@ -10,7 +10,7 @@ angular.module('mapping', [])
 function ($q, $window) {
     // Google's url for async maps initialization accepting callback function
     var callback_name = 'initialize_maps';
-    var maps_url = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&signed_in=false&callback=';
+    var maps_url = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=false&callback=';
     var maps_defer = $q.defer();
 
     $window[callback_name] = maps_defer.resolve;
@@ -261,29 +261,32 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
 function ($rootScope, GoogleService, MarkerService) {
     return {
         restrict: 'EA',
-        scope: {
-            latitude: '=',
-            longitude: '=',
-            opt: '=options',
-            zoom: '='
-        },
         controller: 'GoogleMapController',
         link: function ($scope, element, attr) {
-            $scope.latitude = $scope.latitude || 0;
-            $scope.longitude = $scope.longitude || 0;
+            attr.latitude = attr.latitude || 0;
+            attr.longitude = attr.longitude || 0;
+            attr.zoom = attr.zoom || 16;
+
             // set custom google map options from other attributes
             // @see GoogleMapController for supported options
-            angular.extend($scope.options, $scope.opt);
+            for (var opt in attr) {
+                $scope.set(opt, attr[opt]);
+            }
             GoogleService.initialized.then(function () {
-                $scope.options.center = new google.maps.LatLng($scope.latitude, $scope.longitude);
+                $scope.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
                 $scope.element = element[0];
                 $scope.initialize().then(function () {
-                    $scope.$watchGroup(['latitude', 'longitude'], function () {
-                        $scope.googlemap.setCenter(new google.maps.LatLng($scope.latitude, $scope.longitude));
-                    });
-                    $scope.$watch('zoom', function (zoom) {
-                        $scope.googlemap.setZoom(zoom);
-                    });
+                    function repositionMap() {
+                        $scope.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
+                        $scope.googlemap.setCenter($scope.options.center);
+                    }
+                    function rezoomMap() {
+                        $scope.options.zoom = parseInt(attr.zoom, 10);
+                        $scope.googlemap.setZoom($scope.options.zoom);
+                    }
+                    attr.$observe('latitude', repositionMap);
+                    attr.$observe('longitude', repositionMap);
+                    attr.$observe('zoom', rezoomMap);
                     $scope.refresh();
                 });
             });
