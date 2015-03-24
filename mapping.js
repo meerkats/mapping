@@ -10,7 +10,7 @@ angular.module('mapping', [])
 function ($q, $window) {
     // Google's url for async maps initialization accepting callback function
     var callback_name = 'initialize_maps';
-    var maps_url = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&callback=';
+    var maps_url = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&signed_in=false&callback=';
     var maps_defer = $q.defer();
 
     $window[callback_name] = maps_defer.resolve;
@@ -264,7 +264,7 @@ function ($rootScope, GoogleService, MarkerService) {
         scope: {
             latitude: '=',
             longitude: '=',
-            options: '=',
+            opt: '=options',
             zoom: '='
         },
         controller: 'GoogleMapController',
