@@ -1,0 +1,25 @@
+{
+  "name": "mapping",
+  "version": "0.3.1",
+  "description": "Mapping places and things with angular.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meerkats/mapping.git"
+  },
+  "keywords": [
+    "angular",
+    "google",
+    "map",
+    "directive"
+  ],
+  "author": "Meerkats",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/meerkats/mapping/issues"
+  },
+  "homepage": "https://github.com/meerkats/mapping"
+}
