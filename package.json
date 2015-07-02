@@ -1,6 +1,6 @@
 {
   "name": "mapping",
-  "version": "1.0.0",
+  "version": "0.3.1",
   "description": "Mapping places and things with angular.",
   "main": "index.js",
   "scripts": {
