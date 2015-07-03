@@ -241,9 +241,9 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * @return Google MarkerImage
      */
     $scope.iconFromURL = function (url, size, scaled_size, anchor) {
-        size = size || { x: 50, y: 50 };
-        scaled_size = scaled_size || { x: size.x/2, y: size.y/2 };
-        anchor = anchor || { x: size.x/2, y: size.y };
+        size = angular.extend({ x: 50, y: 50 }, size);
+        scaled_size = angular.extend({ x: size.x/2, y: size.y/2 }, scaled_size);
+        anchor = angular.extend({ x: size.x/2, y: size.y }, anchor);
         return {
             anchor: new google.maps.Point(anchor.x, anchor.y),
             origin: new google.maps.Point(0, 0),
