@@ -298,7 +298,6 @@ function ($rootScope, GoogleService, MarkerService) {
                     attr.$observe('longitude', repositionMap);
                     attr.$observe('zoom', rezoomMap);
                     $scope.refresh();
-
                     $rootScope.$broadcast('google_map_initialized', $scope.refresh);
                 });
             });
