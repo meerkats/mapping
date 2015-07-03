@@ -197,6 +197,11 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
         if ($window.google) {
             _markers = [];
             var markers = MarkerService.markers();
+            if (marker.icon) {
+                marker.icon = $scope.iconFromURL(marker.icon.url,
+                                                 marker.icon.size,
+                                                 marker.icon.anchor);
+            }
             angular.forEach(markers, function (marker) {
                 $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
                                  marker.title,
@@ -230,14 +235,18 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * Create valid map pin icon from provided image url at provided
      * image size (square)
      * @param {string} url URL for icon
-     * @param {number} size Square size of the icon in pixels to display
+     * @param {object} size x and y dimensions of the icon in pixels to display
+     * @param {object} anchor x and y offsets of the icon in pixels to display
      * @return Google MarkerImage
      */
-    $scope.iconFromURL = function (url, size) {
-        size = size || 50;
+    $scope.iconFromURL = function (url, size, anchor) {
+        size = size || { x: 50, y: 50 };
+        anchor = anchor || { x: size.x/2, y: size.y };
         return {
+            anchor: new google.maps.Point(anchor.x, anchor.y),
             origin: new google.maps.Point(0, 0),
-            scaledSize: new google.maps.Size(size, size),
+            scaledSize: new google.maps.Size(size.x/2, size.y/2),
+            size: new google.maps.Size(size.x, size.y),
             url: url
         };
     };
