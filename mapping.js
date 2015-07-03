@@ -239,13 +239,14 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * @param {object} anchor x and y offsets of the icon in pixels to display
      * @return Google MarkerImage
      */
-    $scope.iconFromURL = function (url, size, anchor) {
+    $scope.iconFromURL = function (url, size, scaled_size, anchor) {
         size = size || { x: 50, y: 50 };
+        scaled_size = scaled_size || { x: size.x/2, y: size.y/2 };
         anchor = anchor || { x: size.x/2, y: size.y };
         return {
             anchor: new google.maps.Point(anchor.x, anchor.y),
             origin: new google.maps.Point(0, 0),
-            scaledSize: new google.maps.Size(size.x/2, size.y/2),
+            scaledSize: new google.maps.Size(scaled_size.x, scaled_size.y),
             size: new google.maps.Size(size.x, size.y),
             url: url
         };
