@@ -201,6 +201,7 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
                 if (marker.icon) {
                     marker.icon = $scope.iconFromURL(marker.icon.url,
                                                      marker.icon.size,
+                                                     marker.icon.scaledSize,
                                                      marker.icon.anchor);
                 }
                 $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
@@ -256,7 +257,6 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
     $scope.$watch(function () { return MarkerService.markers(); }, function () {
         $scope.refresh();
     });
-
 }])
 
 /**
