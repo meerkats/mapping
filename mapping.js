@@ -197,12 +197,12 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
         if ($window.google) {
             _markers = [];
             var markers = MarkerService.markers();
-            if (marker.icon) {
-                marker.icon = $scope.iconFromURL(marker.icon.url,
-                                                 marker.icon.size,
-                                                 marker.icon.anchor);
-            }
             angular.forEach(markers, function (marker) {
+                if (marker.icon) {
+                    marker.icon = $scope.iconFromURL(marker.icon.url,
+                                                     marker.icon.size,
+                                                     marker.icon.anchor);
+                }
                 $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
                                  marker.title,
                                  marker.title,
