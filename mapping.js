@@ -198,6 +198,12 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
             _markers = [];
             var markers = MarkerService.markers();
             angular.forEach(markers, function (marker) {
+                if (marker.icon) {
+                    marker.icon = $scope.iconFromURL(marker.icon.url,
+                                                     marker.icon.size,
+                                                     marker.icon.scaledSize,
+                                                     marker.icon.anchor);
+                }
                 $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
                                  marker.title,
                                  marker.title,
@@ -230,14 +236,19 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * Create valid map pin icon from provided image url at provided
      * image size (square)
      * @param {string} url URL for icon
-     * @param {number} size Square size of the icon in pixels to display
+     * @param {object} size 'width' and 'height' dimensions of the icon in pixels to display
+     * @param {object} anchor 'x' and 'y' offsets of the icon in pixels to display
      * @return Google MarkerImage
      */
-    $scope.iconFromURL = function (url, size) {
-        size = size || 50;
+    $scope.iconFromURL = function (url, size, scaled_size, anchor) {
+        size = angular.extend({ width: 50, height: 50 }, size);
+        scaled_size = angular.extend({ width: size.width/2, height: size.height/2 }, scaled_size);
+        anchor = angular.extend({ x: size.width/2, y: size.height }, anchor);
         return {
+            anchor: new google.maps.Point(anchor.x, anchor.y),
             origin: new google.maps.Point(0, 0),
-            scaledSize: new google.maps.Size(size, size),
+            scaledSize: new google.maps.Size(scaled_size.width, scaled_size.height),
+            size: new google.maps.Size(size.width, size.height),
             url: url
         };
     };
@@ -246,7 +257,6 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
     $scope.$watch(function () { return MarkerService.markers(); }, function () {
         $scope.refresh();
     });
-
 }])
 
 /**
@@ -288,6 +298,7 @@ function ($rootScope, GoogleService, MarkerService) {
                     attr.$observe('longitude', repositionMap);
                     attr.$observe('zoom', rezoomMap);
                     $scope.refresh();
+                    $rootScope.$broadcast('google_map_initialized', $scope.refresh);
                 });
             });
         }
