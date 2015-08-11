@@ -1,3 +1,3 @@
-require('mapping');
+require('./mapping');
 
 module.exports = 'mapping';
