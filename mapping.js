@@ -25,7 +25,6 @@ angular.module('mapping', [])
       initialized: mapsDefer.promise
     };
   })
-
   /**
    * @ngdoc service
    * @name mapping.service:MarkerService
@@ -87,7 +86,6 @@ angular.module('mapping', [])
       getMarkers: getMarkers
     };
   })
-
   /**
    * @ngdoc service
    * @name mapping.service:GoogleMapController
@@ -236,7 +234,6 @@ angular.module('mapping', [])
       };
     };
   })
-
   /**
    * @ngdoc controller
    * @name mapping.controller:GoogleMapController
@@ -246,13 +243,8 @@ angular.module('mapping', [])
   // @ngInject
   .controller('GoogleMapController', function ($scope, MarkerService, GoogleMapService) {
     // Update markers
-    $scope.$watch(function () {
-      return MarkerService.getMarkers();
-    }, function () {
-      GoogleMapService.refresh();
-    });
+    $scope.$watch(MarkerService.getMarkers, GoogleMapService.refresh);
   })
-
   /**
    * @ngdoc directive
    * @name toggle.directive:googleMap
@@ -291,13 +283,11 @@ angular.module('mapping', [])
             attr.$observe('longitude', repositionMap);
             attr.$observe('zoom', rezoomMap);
             GoogleMapService.refresh();
-            $rootScope.$broadcast('google_map_initialized', GoogleMapService.refresh);
           });
         });
       }
     };
   })
-
   /**
    * @ngdoc directive
    * @name toggle.directive:markerOnCenter
@@ -318,7 +308,6 @@ angular.module('mapping', [])
       }
     };
   })
-
   /**
    * @ngdoc directive
    * @name toggle.directive:markerIcon
@@ -330,14 +319,14 @@ angular.module('mapping', [])
    * as an expressions pointing to a scope variable (e.g. `marker-icon="icon"`).
    */
    // @ngInject
-  .directive('markerIcon', function () {
+  .directive('markerIcon', function (GoogleMapService) {
     return {
       restrict: 'A',
       scope: {
         markerIcon: '=markerIcon'
       },
       link: function ($scope) {
-        $scope.$parent.defaultIcon = $scope.markerIcon;
+        GoogleMapService.defaultIcon = $scope.markerIcon;
       }
     };
   });
