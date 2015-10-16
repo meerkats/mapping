@@ -186,9 +186,9 @@ angular.module('mapping', [])
                                              marker.icon.anchor);
           }
           service.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
-                               marker.title,
-                               marker.title,
-                               marker.icon);
+                            marker.title,
+                            marker.title,
+                            marker.icon);
         });
       }
     };
