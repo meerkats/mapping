@@ -1,3 +1,4 @@
+![Travis CI](https://travis-ci.org/meerkats/mapping.svg)
 # Mapping
 
 A set of directives to map places and things with angular. Supports the following mapping solutions:
