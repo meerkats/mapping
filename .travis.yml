@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+ - '0.12'
+ - '4.0'
+ - '4.1'
+cache:
+ directories:
+   - node_modules
+notifications:
+  email: false
+  slack:
+    secure: ctOOF63sCRG1MP67k2fAxtDrJ66UXbA06KH5Y28CLBjmryPMaS74XfIeWSXI6Nepgu+5/oeHG7do/JP6zMpwT3Gf+OuillkFvUbxqC4gSy2qEiu+aP4ErywTKVc9X4YGWMEA0ZgfcB4Ka8+9vZil/cgF0YztuFwUJJPkShJL1Es=

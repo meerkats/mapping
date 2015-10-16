@@ -1,55 +1,50 @@
 angular.module('mapping', [])
-
-/**
- * @ngdoc service
- * @name mapping.service:GoogleService
- * @description
- * Asynchronously load the Google API.
- */
-.factory('GoogleService', ['$q', '$window',
-function ($q, $window) {
+  /**
+   * @ngdoc service
+   * @name mapping.service:GoogleService
+   * @description
+   * Asynchronously load the Google API.
+   */
+   // @ngInject
+  .factory('GoogleService', function ($q, $window) {
     // Google's url for async maps initialization accepting callback function
-    var callback_name = 'initialize_maps';
-    var maps_url = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=false&callback=';
-    var maps_defer = $q.defer();
+    const callbackName = 'initializeMaps';
+    const mapsUrl = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=false&callback=';
+    const mapsDefer = $q.defer();
 
-    $window[callback_name] = maps_defer.resolve;
+    $window[callbackName] = mapsDefer.resolve;
 
     // Start loading google maps
     (function () {
-          var script = document.createElement('script');
-          script.src = maps_url + callback_name;
-          document.body.appendChild(script);
+      var script = document.createElement('script');
+      script.src = mapsUrl + callbackName;
+      document.body.appendChild(script);
     })();
 
     return {
-        initialized: maps_defer.promise
+      initialized: mapsDefer.promise
     };
-}])
-
-/**
- * @ngdoc service
- * @name mapping.service:MarkerService
- * @description
- * Set of markers to be used within the map.
- */
-.service('MarkerService', [
-function () {
-
-    var _markers = [];
-
+  })
+  /**
+   * @ngdoc service
+   * @name mapping.service:MarkerService
+   * @description
+   * Set of markers to be used within the map.
+   */
+  .service('MarkerService', function () {
+    var markers = [];
     /**
      * Marker object to contain required information for each pin.
      */
-    var Marker = function (options) {
-        if (!options.latitude || !options.longitude) {
-            return null;
-        }
-        this.id = this.id; // @todo generate id fallback
-        this.latitude = options.latitude;
-        this.longitude = options.longitude;
-        this.title = options.title || null;
-        this.icon = options.icon || null;
+    const Marker = function (options) {
+      if (!options.latitude || !options.longitude) {
+        return null;
+      }
+      this.id = this.id; // @todo generate id fallback
+      this.latitude = options.latitude;
+      this.longitude = options.longitude;
+      this.title = options.title || null;
+      this.icon = options.icon || null;
     };
 
     /**
@@ -59,91 +54,76 @@ function () {
      * @param {string} title Label for this marker
      * @return Marker object
      */
-    var addMarker = function (latitude, longitude, title, icon) {
-        var marker = new Marker({
-            latitude: latitude,
-            longitude: longitude,
-            title: title,
-            icon: icon
-        });
-        _markers.push(marker);
-        return marker;
+    const addMarker = function (latitude, longitude, title, icon) {
+      const marker = new Marker({
+        latitude: latitude,
+        longitude: longitude,
+        title: title,
+        icon: icon
+      });
+      markers.push(marker);
+      return marker;
     };
 
     /**
      * Remove all markers from data source
      */
-    var clearMarkers = function () {
-        _markers = [];
+    const clearMarkers = function () {
+      markers = [];
     };
 
     /**
      * Return all markers in the data source
      * @return Array of all active markers
      */
-    var markers = function () {
-        return _markers;
+    const getMarkers = function () {
+      return markers;
     };
 
     return {
-        addMarker: addMarker,
-        clearMarkers: clearMarkers,
-        markers: markers
+      addMarker: addMarker,
+      clearMarkers: clearMarkers,
+      getMarkers: getMarkers
     };
-
-}])
-
-/**
- * @ngdoc controller
- * @name mapping.controller:GoogleMapController
- * @description
- * Controls interactive Google Map and interactive map markers
- */
-.controller('GoogleMapController', ['$scope', '$timeout', '$q', '$window', 'GoogleService', 'MarkerService',
-function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
-
-    var _markers = [];
-    var AVAILABLE_OPTIONS = {
-        'backgroundColor': String,
-        'disableDefaultUI': Boolean,
-        'disableDoubleClickZoom': Boolean,
-        'draggable': Boolean,
-        'draggableCursor': String,
-        'draggingCursor': String,
-        'heading': Number,
-        'keyboardShortcuts': Boolean,
-        'mapMaker': Boolean,
-        'mapTypeControl': Boolean,
-        'maxZoom': Number,
-        'minZoom': Number,
-        'noClear': Boolean,
-        'overviewMapControl': Boolean,
-        'panControl': Boolean,
-        'rotateControl': Boolean,
-        'scaleControl': Boolean,
-        'scrollwheel': Boolean,
-        'streetViewControl': Boolean,
-        'tilt': Number,
-        'zoom': Number,
-        'zoomControl': Boolean,
-        // @TODO UNSUPPORTED OPTIONS
-        // 'center': LatLng,
-        // 'mapTypeControlOptions': MapTypeControlOptions,
-        // 'mapTypeId': MapTypeId,
-        // 'overviewMapControlOptions': OverviewMapControlOptions,
-        // 'panControlOptions': PanControlOptions,
-        // 'rotateControlOptions': RotateControlOptions,
-        // 'scaleControlOptions': ScaleControlOptions,
-        // 'streetView': StreetViewPanorama,
-        // 'streetViewControlOptions': StreetViewControlOptions,
-        // 'styles': Array,
-        // 'zoomControlOptions': ZoomControlOptions
+  })
+  /**
+   * @ngdoc service
+   * @name mapping.service:GoogleMapController
+   * @description
+   * Service interactive Google Map and interactive map markers
+   */
+  // @ngInject
+  .service('GoogleMapService', function ($timeout, $q, $window, GoogleService, MarkerService) {
+    var service = this;
+    const AVAILABLE_OPTIONS = {
+      'backgroundColor': String,
+      'disableDefaultUI': Boolean,
+      'disableDoubleClickZoom': Boolean,
+      'draggable': Boolean,
+      'draggableCursor': String,
+      'draggingCursor': String,
+      'heading': Number,
+      'keyboardShortcuts': Boolean,
+      'mapMaker': Boolean,
+      'mapTypeControl': Boolean,
+      'maxZoom': Number,
+      'minZoom': Number,
+      'noClear': Boolean,
+      'overviewMapControl': Boolean,
+      'panControl': Boolean,
+      'rotateControl': Boolean,
+      'scaleControl': Boolean,
+      'scrollwheel': Boolean,
+      'streetViewControl': Boolean,
+      'tilt': Number,
+      'zoom': Number,
+      'zoomControl': Boolean,
     };
-
-    $scope.element = null;
-    $scope.options = {};
-    $scope.googlemap = null;
-    $scope.default_icon = null;
+    this.markers = [];
+    this.element = null;
+    this.options = {};
+    this.googlemap = null;
+    this.defaultIcon = null;
 
     /**
      * Set Google Maps API v3 `MapOption`
@@ -151,15 +131,16 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * @param {string} key MapOption property
      * @param {string} value MapOption value (can be string)
      */
-    $scope.set = function (key, value) {
-        angular.forEach(AVAILABLE_OPTIONS, function (_value, _key) {
-            if (_key.toLowerCase() === key) {
-                if (_value === Boolean) {
-                    value = (value === '' || value === 'true') ? true : false;
-                }
-                $scope.options[_key] = AVAILABLE_OPTIONS[_key](value);
-            }
-        });
+    this.set = function (key, value) {
+      angular.forEach(AVAILABLE_OPTIONS, function (optionValue, optionKey) {
+        if (optionKey.toLowerCase() === key) {
+          const updatedValue = value;
+          if (optionValue === Boolean) {
+            updatedValue = (value === '' || value === 'true') ? true : false;
+          }
+          service.options[optionKey] = AVAILABLE_OPTIONS[optionKey](updatedValue);
+        }
+      });
     };
 
     /**
@@ -168,48 +149,48 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * @param {object} options Google Map options
      * @return Initialized Google Map object
      */
-    $scope.initialize = function (callback) {
-        var google_defer = $q.defer();
-        var _initialized = false;
-        var _initialize = function () {
-            if (_initialized) {
-                return;
-            }
-            $scope.googlemap = new google.maps.Map($scope.element, $scope.options);
-            $timeout(function () {
-                $scope.refresh();
-            });
-            if (typeof callback === 'function') {
-                callback($scope);
-            }
-            google_defer.resolve();
-        };
-        google.maps.event.addDomListener(window, 'load', _initialize);
-        setTimeout(_initialize, 1500); // fallback for IE8
-        return google_defer.promise;
+    this.initialize = function (callback) {
+      var isInitialized = false;
+      const googleDefer = $q.defer();
+      const initialize = function () {
+        if (isInitialized) {
+          return callback($scope);
+        }
+        service.googlemap = new google.maps.Map(service.element, service.options);
+        $timeout(function () {
+          service.refresh();
+        });
+        if (typeof callback === 'function') {
+          return callback($scope);
+        }
+        googleDefer.resolve();
+      };
+      google.maps.event.addDomListener(window, 'load', initialize);
+      setTimeout(initialize, 1500); // fallback for IE8
+      return googleDefer.promise;
     };
 
     /**
      * Refresh map markers, redraw each marker to ensure everything is up to
      * date with the MarkerService
      */
-    $scope.refresh = function () {
-        if ($window.google) {
-            _markers = [];
-            var markers = MarkerService.markers();
-            angular.forEach(markers, function (marker) {
-                if (marker.icon) {
-                    marker.icon = $scope.iconFromURL(marker.icon.url,
-                                                     marker.icon.size,
-                                                     marker.icon.scaledSize,
-                                                     marker.icon.anchor);
-                }
-                $scope.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
-                                 marker.title,
-                                 marker.title,
-                                 marker.icon);
-            });
-        }
+    this.refresh = function () {
+      var markers = MarkerService.getMarkers();
+      if ($window.google) {
+        service.markers = [];
+        angular.forEach(markers, function (marker) {
+          if (marker.icon) {
+            marker.icon = service.iconFromURL(marker.icon.url,
+                                             marker.icon.size,
+                                             marker.icon.scaledSize,
+                                             marker.icon.anchor);
+          }
+          service.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
+                            marker.title,
+                            marker.title,
+                            marker.icon);
+        });
+      }
     };
 
     /**
@@ -220,16 +201,16 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * @param {MarkerIcon} icon Visual icon to plot on map
      * @return MapMarker
      */
-    $scope.addMarker = function (position, id, title, icon) {
-        var marker = new google.maps.Marker({
-            map: $scope.googlemap,
-            position: position,
-            title: title,
-            id: id,
-            icon: icon || $scope.default_icon
-        });
-        _markers.push(marker);
-        return marker;
+    this.addMarker = function (position, id, title, icon) {
+      const marker = new google.maps.Marker({
+        map: service.googlemap,
+        position: position,
+        title: title,
+        id: id,
+        icon: icon || service.defaultIcon
+      });
+      service.markers.push(marker);
+      return marker;
     };
 
     /**
@@ -240,113 +221,112 @@ function ($scope, $timeout, $q, $window, GoogleService, MarkerService) {
      * @param {object} anchor 'x' and 'y' offsets of the icon in pixels to display
      * @return Google MarkerImage
      */
-    $scope.iconFromURL = function (url, size, scaled_size, anchor) {
-        size = angular.extend({ width: 50, height: 50 }, size);
-        scaled_size = angular.extend({ width: size.width/2, height: size.height/2 }, scaled_size);
-        anchor = angular.extend({ x: size.width/2, y: size.height }, anchor);
-        return {
-            anchor: new google.maps.Point(anchor.x, anchor.y),
-            origin: new google.maps.Point(0, 0),
-            scaledSize: new google.maps.Size(scaled_size.width, scaled_size.height),
-            size: new google.maps.Size(size.width, size.height),
-            url: url
-        };
+    this.iconFromURL = function (url, size, scaledSize, anchor) {
+      const newSize = angular.extend({ width: 50, height: 50 }, size);
+      const newScaledSize = angular.extend({ width: newSize.width / 2, height: newSize.height / 2 }, scaledSize);
+      const newAnchor = angular.extend({ x: newSize.width / 2, y: newSize.height }, anchor);
+      return {
+        anchor: new google.maps.Point(newAnchor.x, newAnchor.y),
+        origin: new google.maps.Point(0, 0),
+        scaledSize: new google.maps.Size(newScaledSize.width, newScaledSize.height),
+        size: new google.maps.Size(newSize.width, newSize.height),
+        url: url
+      };
     };
-
+  })
+  /**
+   * @ngdoc controller
+   * @name mapping.controller:GoogleMapController
+   * @description
+   * Service interactive Google Map and interactive map markers
+   */
+  // @ngInject
+  .controller('GoogleMapController', function ($scope, MarkerService, GoogleMapService) {
     // Update markers
-    $scope.$watch(function () { return MarkerService.markers(); }, function () {
-        $scope.refresh();
-    });
-}])
-
-/**
- * @ngdoc directive
- * @name toggle.directive:googleMap
- * @restrict EA
- *
- * @description
- * Creates a Google Map with all available google map options
- */
-.directive('googleMap', ['$rootScope', 'GoogleService', 'MarkerService',
-function ($rootScope, GoogleService, MarkerService) {
+    $scope.$watch(MarkerService.getMarkers, GoogleMapService.refresh);
+  })
+  /**
+   * @ngdoc directive
+   * @name toggle.directive:googleMap
+   * @restrict EA
+   *
+   * @description
+   * Creates a Google Map with all available google map options
+   */
+   // @ngInject
+  .directive('googleMap', function ($rootScope, GoogleService, GoogleMapService) {
     return {
-        restrict: 'EA',
-        controller: 'GoogleMapController',
-        link: function ($scope, element, attr) {
-            attr.latitude = attr.latitude || 0;
-            attr.longitude = attr.longitude || 0;
-            attr.zoom = attr.zoom || 16;
+      restrict: 'EA',
+      link: function ($scope, element, attr) {
+        attr.latitude = attr.latitude || 0;
+        attr.longitude = attr.longitude || 0;
+        attr.zoom = attr.zoom || 16;
 
-            // set custom google map options from other attributes
-            // @see GoogleMapController for supported options
-            for (var opt in attr) {
-                $scope.set(opt, attr[opt]);
+        // set custom google map options from other attributes
+        // @see GoogleMapController for supported options
+        Object.keys(attr).forEach(function (option) {
+          GoogleMapService.set(option, attr[option]);
+        });
+        GoogleService.initialized.then(function () {
+          GoogleMapService.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
+          GoogleMapService.element = element[0];
+          GoogleMapService.initialize().then(function () {
+            function repositionMap() {
+              GoogleMapService.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
+              GoogleMapService.googlemap.setCenter(GoogleMapService.options.center);
             }
-            GoogleService.initialized.then(function () {
-                $scope.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
-                $scope.element = element[0];
-                $scope.initialize().then(function () {
-                    function repositionMap() {
-                        $scope.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
-                        $scope.googlemap.setCenter($scope.options.center);
-                    }
-                    function rezoomMap() {
-                        $scope.options.zoom = parseInt(attr.zoom, 10);
-                        $scope.googlemap.setZoom($scope.options.zoom);
-                    }
-                    attr.$observe('latitude', repositionMap);
-                    attr.$observe('longitude', repositionMap);
-                    attr.$observe('zoom', rezoomMap);
-                    $scope.refresh();
-                    $rootScope.$broadcast('google_map_initialized', $scope.refresh);
-                });
-            });
-        }
+            function rezoomMap() {
+              GoogleMapService.options.zoom = parseInt(attr.zoom, 10);
+              GoogleMapService.googlemap.setZoom(GoogleMapService.options.zoom);
+            }
+            attr.$observe('latitude', repositionMap);
+            attr.$observe('longitude', repositionMap);
+            attr.$observe('zoom', rezoomMap);
+            GoogleMapService.refresh();
+          });
+        });
+      }
     };
-}])
-
-/**
- * @ngdoc directive
- * @name toggle.directive:markerOnCenter
- * @restrict A
- *
- * @description
- * Adds a marker icon to the center of your map
- */
-.directive('markerOnCenter', ['MarkerService',
-function (MarkerService) {
+  })
+  /**
+   * @ngdoc directive
+   * @name toggle.directive:markerOnCenter
+   * @restrict A
+   *
+   * @description
+   * Adds a marker icon to the center of your map
+   */
+   // @ngInject
+  .directive('markerOnCenter', function (MarkerService, GoogleMapService) {
     return {
-        restrict: 'A',
-        controller: 'GoogleMapController',
-        link: function ($scope, element, attr) {
-            var latitude = attr.latitude || 0;
-            var longitude = attr.longitude || 0;
-            MarkerService.addMarker(latitude, longitude);
-            $scope.refresh();
-        }
+      restrict: 'A',
+      link: function ($scope, element, attr) {
+        const latitude = attr.latitude || 0;
+        const longitude = attr.longitude || 0;
+        MarkerService.addMarker(latitude, longitude);
+        GoogleMapService.refresh();
+      }
     };
-}])
-
-/**
- * @ngdoc directive
- * @name toggle.directive:markerIcon
- * @restrict A
- *
- * @description
- * Sets default map icon as per specifications of your mapping tool.
- * This can be provided as JSON (e.g. `marker-icon="{ url: xxx }"`) or
- * as an expressions pointing to a scope variable (e.g. `marker-icon="icon"`).
- */
-.directive('markerIcon', ['MarkerService',
-function (MarkerService) {
+  })
+  /**
+   * @ngdoc directive
+   * @name toggle.directive:markerIcon
+   * @restrict A
+   *
+   * @description
+   * Sets default map icon as per specifications of your mapping tool.
+   * This can be provided as JSON (e.g. `marker-icon="{ url: xxx }"`) or
+   * as an expressions pointing to a scope variable (e.g. `marker-icon="icon"`).
+   */
+   // @ngInject
+  .directive('markerIcon', function (GoogleMapService) {
     return {
-        restrict: 'A',
-        controller: 'GoogleMapController',
-        scope: {
-            markerIcon: '=markerIcon'
-        },
-        link: function ($scope, element, attr) {
-            $scope.$parent.default_icon = $scope.markerIcon;
-        }
+      restrict: 'A',
+      scope: {
+        markerIcon: '=markerIcon'
+      },
+      link: function ($scope) {
+        GoogleMapService.defaultIcon = $scope.markerIcon;
+      }
     };
-}]);
+  });
