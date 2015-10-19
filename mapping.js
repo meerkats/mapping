@@ -145,29 +145,21 @@ angular.module('mapping', [])
 
     /**
      * Initialize google map against provided element and options.
-     * @param {object} element HTML element to use as Google Map container
-     * @param {object} options Google Map options
      * @return Initialized Google Map object
      */
-    this.initialize = function (callback) {
-      var isInitialized = false;
-      const googleDefer = $q.defer();
-      const initialize = function () {
-        if (isInitialized) {
-          return callback($scope);
-        }
-        service.googlemap = new google.maps.Map(service.element, service.options);
-        $timeout(function () {
-          service.refresh();
-        });
-        if (typeof callback === 'function') {
-          return callback($scope);
-        }
-        googleDefer.resolve();
-      };
-      google.maps.event.addDomListener(window, 'load', initialize);
-      setTimeout(initialize, 1500); // fallback for IE8
-      return googleDefer.promise;
+    this.initialize = function () {
+      const deferred = $q.defer();
+      if (service.googlemap) {
+        deferred.resolve(service.googlemap);
+      }
+      else {
+        GoogleService.initialized.then(function () {
+          service.googlemap = new google.maps.Map(service.element, service.options);
+          deferred.resolve(service.googlemap);
+          console.log('here?');
+        }, deferred.reject);
+      }
+      return deferred.promise;
     };
 
     /**
