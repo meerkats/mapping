@@ -187,7 +187,6 @@ angular.module('mapping', [])
      * @return MapMarker
      */
     this.addMarker = function (position, id, title, icon) {
-      console.log(icon);
       const marker = new google.maps.Marker({
         map: service.googlemap,
         position: position,
@@ -242,7 +241,6 @@ angular.module('mapping', [])
     return {
       restrict: 'EA',
       link: function ($scope, element, attr) {
-        console.log('ok');
         attr.latitude = attr.latitude || 0;
         attr.longitude = attr.longitude || 0;
         attr.zoom = attr.zoom || 16;
