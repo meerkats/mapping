@@ -11,16 +11,13 @@ angular.module('mapping', [])
     const callbackName = 'initializeMaps';
     const mapsUrl = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=false&callback=';
     const mapsDefer = $q.defer();
-
     $window[callbackName] = mapsDefer.resolve;
-
     // Start loading google maps
     (function () {
       var script = document.createElement('script');
       script.src = mapsUrl + callbackName;
       document.body.appendChild(script);
     })();
-
     return {
       initialized: mapsDefer.promise
     };
@@ -46,7 +43,6 @@ angular.module('mapping', [])
       this.title = options.title || null;
       this.icon = options.icon || null;
     };
-
     /**
      * Add marker to marker set
      * @param {number} latitude Latitude for pin location
@@ -64,14 +60,12 @@ angular.module('mapping', [])
       markers.push(marker);
       return marker;
     };
-
     /**
      * Remove all markers from data source
      */
     const clearMarkers = function () {
       markers = [];
     };
-
     /**
      * Return all markers in the data source
      * @return Array of all active markers
@@ -79,7 +73,6 @@ angular.module('mapping', [])
     const getMarkers = function () {
       return markers;
     };
-
     return {
       addMarker: addMarker,
       clearMarkers: clearMarkers,
@@ -118,13 +111,13 @@ angular.module('mapping', [])
       'tilt': Number,
       'zoom': Number,
       'zoomControl': Boolean,
+      'styles': Object
     };
+    var mapNode = null;
     this.markers = [];
-    this.element = null;
     this.options = {};
     this.googlemap = null;
     this.defaultIcon = null;
-
     /**
      * Set Google Maps API v3 `MapOption`
      * @see https://developers.google.com/maps/documentation/javascript/reference#MapOptions
@@ -141,27 +134,28 @@ angular.module('mapping', [])
           service.options[optionKey] = AVAILABLE_OPTIONS[optionKey](updatedValue);
         }
       });
+      // TODO: Set the option on existing Google Map once completed
+      if (service.googlemap) {
+        service.googlemap.setOptions(service.options);
+      }
     };
-
     /**
      * Initialize google map against provided element and options.
      * @return Initialized Google Map object
      */
-    this.initialize = function () {
+    this.initialize = function (element) {
       const deferred = $q.defer();
-      if (service.googlemap) {
+      if (service.googlemap && element === mapNode) {
         deferred.resolve(service.googlemap);
       }
       else {
         GoogleService.initialized.then(function () {
-          service.googlemap = new google.maps.Map(service.element, service.options);
+          service.googlemap = new google.maps.Map(element, service.options);
           deferred.resolve(service.googlemap);
-          console.log('here?');
         }, deferred.reject);
       }
       return deferred.promise;
     };
-
     /**
      * Refresh map markers, redraw each marker to ensure everything is up to
      * date with the MarkerService
@@ -184,7 +178,6 @@ angular.module('mapping', [])
         });
       }
     };
-
     /**
      * Add a new marker pin to visible map
      * @param {LatLng} position google.map.LatLng object for marker location
@@ -197,14 +190,11 @@ angular.module('mapping', [])
       const marker = new google.maps.Marker({
         map: service.googlemap,
         position: position,
-        title: title,
-        id: id,
-        icon: icon || service.defaultIcon
+        title: title
       });
       service.markers.push(marker);
       return marker;
     };
-
     /**
      * Create valid map pin icon from provided image url at provided
      * image size (square)
@@ -246,10 +236,11 @@ angular.module('mapping', [])
    * Creates a Google Map with all available google map options
    */
    // @ngInject
-  .directive('googleMap', function ($rootScope, GoogleService, GoogleMapService) {
+  .directive('googleMap', function (GoogleService, GoogleMapService) {
     return {
       restrict: 'EA',
       link: function ($scope, element, attr) {
+        console.log('ok');
         attr.latitude = attr.latitude || 0;
         attr.longitude = attr.longitude || 0;
         attr.zoom = attr.zoom || 16;
@@ -257,12 +248,11 @@ angular.module('mapping', [])
         // set custom google map options from other attributes
         // @see GoogleMapController for supported options
         Object.keys(attr).forEach(function (option) {
-          GoogleMapService.set(option, attr[option]);
+          GoogleMapService.set(option, $scope.$eval(attr[option]));
         });
         GoogleService.initialized.then(function () {
           GoogleMapService.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
-          GoogleMapService.element = element[0];
-          GoogleMapService.initialize().then(function () {
+          GoogleMapService.initialize(element[0]).then(function () {
             function repositionMap() {
               GoogleMapService.options.center = new google.maps.LatLng(attr.latitude, attr.longitude);
               GoogleMapService.googlemap.setCenter(GoogleMapService.options.center);
