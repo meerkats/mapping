@@ -165,12 +165,12 @@ angular.module('mapping', [])
       if ($window.google) {
         service.markers = [];
         angular.forEach(markers, function (marker) {
-          if (marker.icon) {
-            marker.icon = service.iconFromURL(marker.icon.url,
-                                             marker.icon.size,
-                                             marker.icon.scaledSize,
-                                             marker.icon.anchor);
-          }
+          // if (marker.icon) {
+          //   marker.icon = service.iconFromURL(marker.icon.url,
+          //                                    marker.icon.size,
+          //                                    marker.icon.scaledSize,
+          //                                    marker.icon.anchor);
+          // }
           service.addMarker(new google.maps.LatLng(marker.latitude, marker.longitude),
                             marker.title,
                             marker.title,
@@ -187,10 +187,12 @@ angular.module('mapping', [])
      * @return MapMarker
      */
     this.addMarker = function (position, id, title, icon) {
+      console.log(icon);
       const marker = new google.maps.Marker({
         map: service.googlemap,
         position: position,
-        title: title
+        title: title,
+        icon: icon
       });
       service.markers.push(marker);
       return marker;
