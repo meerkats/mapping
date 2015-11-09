@@ -133,8 +133,9 @@ angular.module('mapping', [])
      */
     this.set = function (key, value) {
       angular.forEach(AVAILABLE_OPTIONS, function (optionValue, optionKey) {
+        var updatedValue;
         if (optionKey.toLowerCase() === key) {
-          var updatedValue = value;
+          updatedValue = value;
           if (optionValue === Boolean) {
             updatedValue = (value === '' || value === 'true') ? true : false;
           }
@@ -298,11 +299,13 @@ angular.module('mapping', [])
    */
    // @ngInject
   .directive('markerOnCenter', function (MarkerService, GoogleMapService) {
+    var latitude;
+    var longitude;
     return {
       restrict: 'A',
       link: function ($scope, element, attr) {
-        var latitude = attr.latitude || 0;
-        var longitude = attr.longitude || 0;
+        latitude = attr.latitude || 0;
+        longitude = attr.longitude || 0;
         MarkerService.addMarker(latitude, longitude);
         GoogleMapService.refresh();
       }
