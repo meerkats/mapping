@@ -299,13 +299,11 @@ angular.module('mapping', [])
    */
    // @ngInject
   .directive('markerOnCenter', function (MarkerService, GoogleMapService) {
-    var latitude;
-    var longitude;
     return {
       restrict: 'A',
       link: function ($scope, element, attr) {
-        latitude = attr.latitude || 0;
-        longitude = attr.longitude || 0;
+        var latitude = attr.latitude || 0;
+        var longitude = attr.longitude || 0;
         MarkerService.addMarker(latitude, longitude);
         GoogleMapService.refresh();
       }
