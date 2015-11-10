@@ -8,9 +8,9 @@ angular.module('mapping', [])
    // @ngInject
   .factory('GoogleService', function ($q, $window) {
     // Google's url for async maps initialization accepting callback function
-    const callbackName = 'initializeMaps';
-    const mapsUrl = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=false&callback=';
-    const mapsDefer = $q.defer();
+    var callbackName = 'initializeMaps';
+    var mapsUrl = 'https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=false&callback=';
+    var mapsDefer = $q.defer();
 
     $window[callbackName] = mapsDefer.resolve;
 
@@ -36,7 +36,7 @@ angular.module('mapping', [])
     /**
      * Marker object to contain required information for each pin.
      */
-    const Marker = function (options) {
+    var Marker = function (options) {
       if (!options.latitude || !options.longitude) {
         return null;
       }
@@ -54,8 +54,8 @@ angular.module('mapping', [])
      * @param {string} title Label for this marker
      * @return Marker object
      */
-    const addMarker = function (latitude, longitude, title, icon) {
-      const marker = new Marker({
+    var addMarker = function (latitude, longitude, title, icon) {
+      var marker = new Marker({
         latitude: latitude,
         longitude: longitude,
         title: title,
@@ -68,7 +68,7 @@ angular.module('mapping', [])
     /**
      * Remove all markers from data source
      */
-    const clearMarkers = function () {
+    var clearMarkers = function () {
       markers = [];
     };
 
@@ -76,7 +76,7 @@ angular.module('mapping', [])
      * Return all markers in the data source
      * @return Array of all active markers
      */
-    const getMarkers = function () {
+    var getMarkers = function () {
       return markers;
     };
 
@@ -95,7 +95,7 @@ angular.module('mapping', [])
   // @ngInject
   .service('GoogleMapService', function ($timeout, $q, $window, GoogleService, MarkerService) {
     var service = this;
-    const AVAILABLE_OPTIONS = {
+    var AVAILABLE_OPTIONS = {
       'backgroundColor': String,
       'disableDefaultUI': Boolean,
       'disableDoubleClickZoom': Boolean,
@@ -133,8 +133,9 @@ angular.module('mapping', [])
      */
     this.set = function (key, value) {
       angular.forEach(AVAILABLE_OPTIONS, function (optionValue, optionKey) {
+        var updatedValue;
         if (optionKey.toLowerCase() === key) {
-          const updatedValue = value;
+          updatedValue = value;
           if (optionValue === Boolean) {
             updatedValue = (value === '' || value === 'true') ? true : false;
           }
@@ -151,8 +152,8 @@ angular.module('mapping', [])
      */
     this.initialize = function (callback) {
       var isInitialized = false;
-      const googleDefer = $q.defer();
-      const initialize = function () {
+      var googleDefer = $q.defer();
+      var initialize = function () {
         if (isInitialized) {
           return callback($scope);
         }
@@ -202,7 +203,7 @@ angular.module('mapping', [])
      * @return MapMarker
      */
     this.addMarker = function (position, id, title, icon) {
-      const marker = new google.maps.Marker({
+      var marker = new google.maps.Marker({
         map: service.googlemap,
         position: position,
         title: title,
@@ -222,9 +223,9 @@ angular.module('mapping', [])
      * @return Google MarkerImage
      */
     this.iconFromURL = function (url, size, scaledSize, anchor) {
-      const newSize = angular.extend({ width: 50, height: 50 }, size);
-      const newScaledSize = angular.extend({ width: newSize.width / 2, height: newSize.height / 2 }, scaledSize);
-      const newAnchor = angular.extend({ x: newSize.width / 2, y: newSize.height }, anchor);
+      var newSize = angular.extend({ width: 50, height: 50 }, size);
+      var newScaledSize = angular.extend({ width: newSize.width / 2, height: newSize.height / 2 }, scaledSize);
+      var newAnchor = angular.extend({ x: newSize.width / 2, y: newSize.height }, anchor);
       return {
         anchor: new google.maps.Point(newAnchor.x, newAnchor.y),
         origin: new google.maps.Point(0, 0),
@@ -301,8 +302,8 @@ angular.module('mapping', [])
     return {
       restrict: 'A',
       link: function ($scope, element, attr) {
-        const latitude = attr.latitude || 0;
-        const longitude = attr.longitude || 0;
+        var latitude = attr.latitude || 0;
+        var longitude = attr.longitude || 0;
         MarkerService.addMarker(latitude, longitude);
         GoogleMapService.refresh();
       }
