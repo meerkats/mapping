@@ -115,6 +115,7 @@ angular.module('mapping', [])
       'scaleControl': Boolean,
       'scrollwheel': Boolean,
       'streetViewControl': Boolean,
+      'styles': Object,
       'tilt': Number,
       'zoom': Number,
       'zoomControl': Boolean,
@@ -138,6 +139,9 @@ angular.module('mapping', [])
           updatedValue = value;
           if (optionValue === Boolean) {
             updatedValue = (value === '' || value === 'true') ? true : false;
+          }
+          else if (optionValue === Object) {
+            updatedValue = JSON.parse(value);
           }
           service.options[optionKey] = AVAILABLE_OPTIONS[optionKey](updatedValue);
         }
